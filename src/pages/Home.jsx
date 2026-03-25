@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import TimelineSection from "../components/TimelineSection";
 import { storyData } from "../data/storyData";
-import { ChevronDown, MapPin, Calendar, Clock, Play, Pause } from "lucide-react";
+import { ChevronDown, MapPin, Calendar, Clock, Play, Pause, X } from "lucide-react";
 import heroImage from "../assets/images/hero.png";
 
 export default function Home() {
@@ -27,6 +27,24 @@ export default function Home() {
       }, 30);
     }
     return () => clearInterval(scrollInterval);
+  }, [isAutoScrolling]);
+
+  useEffect(() => {
+    if (!isAutoScrolling) return;
+
+    const handleUserInteraction = () => {
+      setIsAutoScrolling(false);
+    };
+
+    window.addEventListener("wheel", handleUserInteraction);
+    window.addEventListener("touchstart", handleUserInteraction, { passive: true });
+    window.addEventListener("keydown", handleUserInteraction);
+
+    return () => {
+      window.removeEventListener("wheel", handleUserInteraction);
+      window.removeEventListener("touchstart", handleUserInteraction);
+      window.removeEventListener("keydown", handleUserInteraction);
+    };
   }, [isAutoScrolling]);
 
   return (
@@ -80,6 +98,26 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+
+      {/* Floating Stop Button */}
+      <AnimatePresence>
+        {isAutoScrolling && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setIsAutoScrolling(false)}
+            className="fixed bottom-12 left-1/2 -translate-x-1/2 z-50 bg-accent text-primary px-8 py-4 rounded-full shadow-large flex items-center space-x-3 group transition-all duration-300 backdrop-blur-md border border-primary/20"
+          >
+            <X size={20} />
+            <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 font-body uppercase tracking-widest text-xs whitespace-nowrap">
+              Stop Story
+            </span>
+          </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* Story Timeline */}
       <div className="relative z-10">
